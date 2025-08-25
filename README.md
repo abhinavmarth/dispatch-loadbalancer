@@ -1,167 +1,183 @@
-# 🚚 Load Balancer - Dispatch Planning System
+# 🚚 Dispatch Load Balancer
 
-## 📌 Project Overview
-The **Load Balancer** project is a Spring Boot application that simulates an **order dispatch planning system**.  
-It assigns customer orders to available vehicles based on capacity, distance, and optimization rules.  
-If some orders cannot be assigned, they are returned as **unassignable orders**.
+A Spring Boot based **Load Balancer** system designed for **vehicle dispatching and load optimization**.  
+This project assigns customer orders to vehicles based on **capacity, load balancing strategy, and distance optimization (Google Maps Directions API)**.  
 
-## 🧠 Project Overview
-
-This service allows:
-- 📦 Ingesting delivery orders
-- 🚗 Ingesting available vehicles
-- 🧮 Generating an optimal dispatch plan based on proximity and capacity
-- ⚖️ Prioritizing HIGH > MEDIUM > LOW order assignments
+It also provides REST APIs for creating orders, assigning them to vehicles, and retrieving dispatch plans.  
 
 ---
 
-## 📐 ERD Diagram
+## ✨ Features
 
-```mermaid
+- 🚛 Assigns orders to available vehicles based on load capacity  
+- 📦 Handles **unassignable orders** gracefully  
+- 🗺️ **Google Maps Directions API** integration for distance calculation  
+- 📊 **H2 Database** for testing and in-memory persistence  
+- 📖 REST APIs documented with **Swagger**  
+- 🛠️ Easily extensible for real-world logistics/dispatching systems  
+
+---
+
+## 🏗️ Project Structure
+
+loadbalancer/
+├── src/main/java/com/freightfox/loadbalancer/
+│ ├── controller/ # REST controllers
+│ ├── service/ # Business logic
+│ ├── repository/ # Data access layer
+│ ├── model/ # Entity & DTO models
+│ └── config/ # Swagger, API, and other configurations
+├── src/test/java/... # Unit & integration tests
+├── resources/
+│ ├── application.properties
+│ └── data.sql # Initial test data (optional)
+└── README.md
+
+yaml
+Copy
+Edit
+
+---
+
+## ⚙️ Tech Stack
+
+- **Java 17**  
+- **Spring Boot 3.x**  
+- **Spring Data JPA (Hibernate)**  
+- **H2 Database**  
+- **Swagger (Springdoc OpenAPI)**  
+- **Google Maps Directions API**  
+
+---
+
+## 🔧 Setup & Run
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/your-username/loadbalancer.git
+   cd loadbalancer
+Configure Google Maps API Key
+Add your API key in application.properties:
+
+properties
+Copy
+Edit
+google.maps.api.key=YOUR_API_KEY
+Run the application
+
+bash
+Copy
+Edit
+mvn spring-boot:run
+Access the application
+
+Swagger UI → http://localhost:8080/swagger-ui.html
+
+H2 Console → http://localhost:8080/h2-console
+
+🛢️ Database (H2)
+Default H2 in-memory database is used.
+
+Connection Details:
+
+URL: jdbc:h2:mem:testdb
+
+Username: sa
+
+Password: (empty)
+
+Console: http://localhost:8080/h2-console
+
+📖 REST APIs
+1️⃣ Orders API
+Create Order
+POST /api/orders
+
+json
+Copy
+Edit
+{
+  "orderId": "ORD001",
+  "weight": 50,
+  "pickupLocation": "Hyderabad",
+  "dropLocation": "Bangalore"
+}
+Get All Orders
+GET /api/orders
+
+2️⃣ Vehicles API
+Create Vehicle
+POST /api/vehicles
+
+json
+Copy
+Edit
+{
+  "vehicleId": "VEH001",
+  "capacity": 200
+}
+Get All Vehicles
+GET /api/vehicles
+
+3️⃣ Dispatch API
+Generate Dispatch Plan
+POST /api/dispatch/plan
+
+json
+Copy
+Edit
+{
+  "strategy": "BALANCED"   // Options: BALANCED, CAPACITY_FIRST, DISTANCE_FIRST
+}
+Response Example
+
+json
+Copy
+Edit
+[
+  {
+    "vehicleId": "VEH001",
+    "totalLoad": 150,
+    "totalDistance": "450 km",
+    "assignedOrders": [
+      { "orderId": "ORD001", "weight": 50 },
+      { "orderId": "ORD002", "weight": 100 }
+    ]
+  },
+  {
+    "vehicleId": "UNASSIGNED",
+    "totalLoad": 0,
+    "totalDistance": "0 km",
+    "assignedOrders": [
+      { "orderId": "ORD005", "weight": 400 }
+    ]
+  }
+]
+📊 ERD (Entity Relationship Diagram)
+mermaid
+Copy
+Edit
 erDiagram
-    Order {
-        Long id
-        String orderId
-        Double latitude
-        Double longitude
-        Integer weight
-        Enum priority
-        String address
+    VEHICLE ||--o{ ORDER : "assigned"
+    VEHICLE {
+        string vehicleId PK
+        int capacity
     }
-
-    Vehicle {
-        Long id
-        String vehicleId
-        Integer capacity
-        Double currLatitude
-        Double currLongitude
-        String currAddress
+    ORDER {
+        string orderId PK
+        int weight
+        string pickupLocation
+        string dropLocation
     }
-
-    OrdersRequest ||--o{ Order : contains
-    VehicleRequest ||--o{ Vehicle : contains
-🔌 API Endpoints
-Method	Endpoint	Description
-POST	/api/dispatch/orders	Submit list of delivery orders
-POST	/api/dispatch/vehicles	Submit list of available vehicles
-GET	/api/dispatch/plan	Get optimized dispatch plan
-
-📤 Sample Requests
-1. POST /api/dispatch/orders
-json
-Copy code
-{
-  "orders": [
-    {
-      "orderId": "O1",
-      "latitude": 28.5,
-      "longitude": 77.0,
-      "packageWeight": 10,
-      "priority": "HIGH",
-      "address": "Hyderabad"
+    PLAN {
+        string vehicleId FK
+        int totalLoad
+        string totalDistance
     }
-  ]
-}
-2. POST /api/dispatch/vehicles
-json
-Copy code
-{
-  "vehicles": [
-    {
-      "vehicleId": "V1",
-      "capacity": 50,
-      "currentLatitude": 28.6,
-      "currentLongitude": 77.3,
-      "currentAddress": "Delhi"
-    }
-  ]
-}
-3. GET /api/dispatch/plan
-json
-Copy code
-{
-  "dispatchPlan": [
-    {
-      "vehicleId": "V1",
-      "totalLoad": 10,
-      "totalDistance": "33.2 km",
-      "assignedOrders": [
-        {
-          "orderId": "O1",
-          "latitude": 28.5,
-          "longitude": 77.0,
-          "weight": 10,
-          "priority": "HIGH",
-          "address": "Hyderabad"
-        }
-      ]
-    }
-  ]
-}
-⚙️ Tech Stack
-Java 17+
-
-Spring Boot 3+
-
-Spring Web
-
-Spring Data JPA
-
-H2 / MySQL (JPA Compatible)
-
-Lombok
-
-Validation API (Jakarta)
-
-JUnit 5
-
-Mockito
-
-🧪 Testing
-Run unit tests:
+🧪 Running Tests
+Run unit & integration tests:
 
 bash
-Copy code
-./mvnw test
-All core business logic is covered with unit tests in:
-
-Copy code
-LoadBalancerServiceTest.java
-🚀 Running the Application
-Prerequisites:
-JDK 17+
-
-Maven
-
-Steps:
-bash
-Copy code
-# Clone the repository
-git clone https://github.com/your-org/freightfox-loadbalancer.git
-cd freightfox-loadbalancer
-
-# Build and run the app
-./mvnw spring-boot:run
-The application will be running at:
-
-arduino
-Copy code
-http://localhost:8080
-📦 Project Structure
-Copy code
-com.freightfox.loadbalancer
-├── controller
-├── model
-├── repository
-├── service
-├── GlobalExceptionHandler.java
-└── LoadbalancerController.java
-🧾 Notes
-Validation errors return a structured JSON response.
-
-Orders and Vehicles must have unique IDs (orderId, vehicleId).
-
-Orders are assigned based on proximity and available vehicle capacity.
-
-Unassigned orders are stored internally for future planning (can be extended to show in plan).
-
+Copy
+Edit
+mvn test
