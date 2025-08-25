@@ -122,12 +122,117 @@ cd loadbalancer
 mvn spring-boot:run
 ```
 
-### 3. Access APIs
-
-* Swagger UI → [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-* H2 Console → [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-
 ---
+#🌐 REST API Endpoints
+🚚 Orders
+➕ Create Orders
+
+POST /api/dispatch/orders
+Request Body:
+
+{
+  "orders": [
+    {
+      "orderId": "ORD001",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "address": "MG Road, Bangalore, Karnataka, India",
+      "packageWeight": 10,
+      "priority": "HIGH"
+    },
+    {
+      "orderId": "ORD002",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "address": "Anna Salai, Chennai, Tamil Nadu, India",
+      "packageWeight": 20,
+      "priority": "MEDIUM"
+    }
+  ]
+}
+
+
+Response:
+
+{
+  "message": "Delivery orders accepted.",
+  "status": "success"
+}
+
+🚛 Vehicles
+➕ Register Vehicles
+
+POST /api/dispatch/vehicles
+Request Body:
+
+{
+  "vehicles": [
+    {
+      "vehicleId": "VEH001",
+      "capacity": 100,
+      "currentLatitude": 12.9716,
+      "currentLongitude": 77.6413,
+      "currentAddress": "Indiranagar, Bangalore, Karnataka, India"
+    },
+    {
+      "vehicleId": "VEH002",
+      "capacity": 150,
+      "currentLatitude": 13.0674,
+      "currentLongitude": 80.2376,
+      "currentAddress": "T Nagar, Chennai, Tamil Nadu, India"
+    }
+  ]
+}
+
+
+Response:
+
+{
+  "message": "Vehicle details accepted.",
+  "status": "success"
+}
+
+📦 Dispatch Plan
+📋 Retrieve Dispatch Plan
+
+GET /api/dispatch/plan
+
+Response:
+
+{
+  "dispatchPlan": [
+    {
+      "vehicleId": "VEH001",
+      "totalLoad": 10,
+      "totalDistance": "5 km",
+      "assignedOrders": [
+        {
+          "orderId": "ORD001",
+          "latitude": 12.9716,
+          "longitude": 77.5946,
+          "address": "MG Road, Bangalore, Karnataka, India",
+          "packageWeight": 10,
+          "priority": "HIGH"
+        }
+      ]
+    },
+    {
+      "vehicleId": "VEH002",
+      "totalLoad": 20,
+      "totalDistance": "6 km",
+      "assignedOrders": [
+        {
+          "orderId": "ORD002",
+          "latitude": 13.0827,
+          "longitude": 80.2707,
+          "address": "Anna Salai, Chennai, Tamil Nadu, India",
+          "packageWeight": 20,
+          "priority": "MEDIUM"
+        }
+      ]
+    }
+  ]
+}
 
 ## ✅ Example API Responses
 
