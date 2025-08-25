@@ -30,22 +30,22 @@ The system integrates with **Google Maps Directions API** for distance calculati
 ---
 
 ## 📂 Project Structure
+```
+
 loadbalancer/
 ├── src/main/java/com/freightfox/loadbalancer/
-│ ├── controller/ # REST controllers
-│ ├── service/ # Business logic
-│ ├── repository/ # Spring Data JPA Repositories
-│ ├── model/ # Entities & DTOs (Vehicle, Order, PlanResponse)
-│ └── LoadBalancerApplication.java
-├── src/test/java/com/freightfox/loadbalancer/ # Unit & Integration tests
+│   ├── controller/    # REST controllers
+│   ├── service/       # Business logic
+│   ├── repository/    # Spring Data JPA Repositories
+│   ├── model/         # Entities & DTOs (Vehicle, Order, PlanResponse)
+│   └── LoadBalancerApplication.java
+├── src/test/java/com/freightfox/loadbalancer/  # Unit & Integration tests
 ├── src/main/resources/
-│ ├── application.properties
-│ └── data.sql (optional test data)
+│   ├── application.properties
+│   └── data.sql (optional test data)
 └── README.md
 
-yaml
-Copy
-Edit
+````
 
 ---
 
@@ -61,23 +61,28 @@ spring.datasource.password=
 spring.jpa.hibernate.ddl-auto=update
 spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
+````
+
 👉 Access H2 Console at:
-http://localhost:8080/h2-console
-Use JDBC URL: jdbc:h2:mem:testdb
+`http://localhost:8080/h2-console`
+Use JDBC URL: `jdbc:h2:mem:testdb`
 
-📖 API Documentation (Swagger)
-Swagger UI is enabled via SpringDoc.
+---
 
-API Docs (JSON): http://localhost:8080/v3/api-docs
+## 📖 API Documentation (Swagger)
 
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI is enabled via **SpringDoc**.
 
-📊 ERD Diagram
+* API Docs (JSON): `http://localhost:8080/v3/api-docs`
+* Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+---
+
+## 📊 ERD Diagram
+
 Below is a simplified Entity Relationship Diagram (ERD):
 
-mermaid
-Copy
-Edit
+```mermaid
 erDiagram
     VEHICLE {
         String vehicle_id PK
@@ -98,28 +103,37 @@ erDiagram
 
     VEHICLE ||--o{ PLAN_RESPONSE : has
     ORDERS ||--o{ PLAN_RESPONSE : assigned
-▶️ How to Run
-1. Clone the repo
-bash
-Copy
-Edit
+```
+
+---
+
+## ▶️ How to Run
+
+### 1. Clone the repo
+
+```bash
 git clone https://github.com/your-username/loadbalancer.git
 cd loadbalancer
-2. Build & Run (Maven)
-bash
-Copy
-Edit
+```
+
+### 2. Build & Run (Maven)
+
+```bash
 mvn spring-boot:run
-3. Access APIs
-Swagger UI → http://localhost:8080/swagger-ui.html
+```
 
-H2 Console → http://localhost:8080/h2-console
+### 3. Access APIs
 
-✅ Example API Responses
-Assign Orders API Response
-json
-Copy
-Edit
+* Swagger UI → [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+* H2 Console → [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+
+---
+
+## ✅ Example API Responses
+
+### Assign Orders API Response
+
+```json
 {
   "vehicleId": "V1",
   "totalLoad": 200,
@@ -129,28 +143,31 @@ Edit
     { "orderId": "O2", "weight": 100, "destination": "Mysore" }
   ]
 }
-Unassignable Orders
-json
-Copy
-Edit
+```
+
+### Unassignable Orders
+
+```json
 {
   "unassignedOrders": [
     { "orderId": "O5", "weight": 400, "destination": "Chennai" }
   ]
 }
-📌 Future Enhancements
-Integrate real-time traffic data with Google Maps API
+```
 
-Support for multiple dispatch strategies (Greedy, Round Robin, Cost-based)
+---
 
-Vehicle route optimization
+## 📌 Future Enhancements
 
-yaml
-Copy
-Edit
+* Integrate **real-time traffic data** with Google Maps API
+* Support for multiple dispatch strategies (Greedy, Round Robin, Cost-based)
+* Vehicle route optimization
+
+```
 
 ---
 
 👉 You can copy this directly into your `README.md`.  
 
-Do you also want me to add **example API endpoints list** (like `/api/orders`, `/api/vehicles`, `/api/plan`) to
+Do you also want me to add **example API endpoints list** (like `/api/orders`, `/api/vehicles`, `/api/plan`) to make the README more developer-friendly?
+```
