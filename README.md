@@ -1,183 +1,163 @@
 # 🚚 Dispatch Load Balancer
 
-A Spring Boot based **Load Balancer** system designed for **vehicle dispatching and load optimization**.  
-This project assigns customer orders to vehicles based on **capacity, load balancing strategy, and distance optimization (Google Maps Directions API)**.  
+A Spring Boot based **Load Balancer (Dispatch System)** that assigns orders to vehicles based on load capacity and optimizes route distances using **Google Maps Directions API**.  
 
-It also provides REST APIs for creating orders, assigning them to vehicles, and retrieving dispatch plans.  
-
----
-
-## ✨ Features
-
-- 🚛 Assigns orders to available vehicles based on load capacity  
-- 📦 Handles **unassignable orders** gracefully  
-- 🗺️ **Google Maps Directions API** integration for distance calculation  
-- 📊 **H2 Database** for testing and in-memory persistence  
-- 📖 REST APIs documented with **Swagger**  
-- 🛠️ Easily extensible for real-world logistics/dispatching systems  
+Database used: **H2 (in-memory)**  
+API Documentation: **Swagger (Springdoc OpenAPI)**  
 
 ---
 
-## 🏗️ Project Structure
-
-loadbalancer/
-├── src/main/java/com/freightfox/loadbalancer/
-│ ├── controller/ # REST controllers
-│ ├── service/ # Business logic
-│ ├── repository/ # Data access layer
-│ ├── model/ # Entity & DTO models
-│ └── config/ # Swagger, API, and other configurations
-├── src/test/java/... # Unit & integration tests
-├── resources/
-│ ├── application.properties
-│ └── data.sql # Initial test data (optional)
-└── README.md
-
-yaml
-Copy
-Edit
+## 📌 Features
+- Assign orders to vehicles based on load capacity.  
+- Unassignable orders are tracked separately.  
+- Optimized distance calculation using **Google Maps Directions API**.  
+- REST APIs with **Swagger UI** integration.  
+- H2 in-memory database with console access.  
 
 ---
 
-## ⚙️ Tech Stack
-
+## 🛠️ Tech Stack
 - **Java 17**  
-- **Spring Boot 3.x**  
-- **Spring Data JPA (Hibernate)**  
+- **Spring Boot 3**  
+- **Spring Data JPA**  
 - **H2 Database**  
-- **Swagger (Springdoc OpenAPI)**  
+- **Swagger / OpenAPI**  
 - **Google Maps Directions API**  
 
 ---
 
-## 🔧 Setup & Run
+## ⚙️ Setup Instructions
 
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/your-username/loadbalancer.git
-   cd loadbalancer
-Configure Google Maps API Key
-Add your API key in application.properties:
+### 1. Clone Repository
+```bash
+git clone https://github.com/yourusername/loadbalancer.git
+cd loadbalancer
+2. Configure Database (H2 In-Memory)
+The project uses H2 in-memory DB.
+Console available at: http://localhost:8080/h2-console
+
+Default Config (application.properties):
 
 properties
 Copy
 Edit
-google.maps.api.key=YOUR_API_KEY
-Run the application
-
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+3. Run Application
 bash
 Copy
 Edit
-mvn spring-boot:run
-Access the application
+./mvnw spring-boot:run
+App runs on: http://localhost:8080
 
-Swagger UI → http://localhost:8080/swagger-ui.html
 
-H2 Console → http://localhost:8080/h2-console
 
-🛢️ Database (H2)
-Default H2 in-memory database is used.
+📡 REST APIs
+1. Assign Orders to Vehicles
+POST /api/plan
 
-Connection Details:
-
-URL: jdbc:h2:mem:testdb
-
-Username: sa
-
-Password: (empty)
-
-Console: http://localhost:8080/h2-console
-
-📖 REST APIs
-1️⃣ Orders API
-Create Order
-POST /api/orders
+📥 Request Body:
 
 json
 Copy
 Edit
 {
-  "orderId": "ORD001",
-  "weight": 50,
-  "pickupLocation": "Hyderabad",
-  "dropLocation": "Bangalore"
+  "vehicles": [
+    { "vehicleId": "V1", "capacity": 100 },
+    { "vehicleId": "V2", "capacity": 80 }
+  ],
+  "orders": [
+    { "orderId": "O1", "load": 50, "destination": "Bangalore" },
+    { "orderId": "O2", "load": 60, "destination": "Chennai" },
+    { "orderId": "O3", "load": 90, "destination": "Hyderabad" }
+  ]
 }
-Get All Orders
-GET /api/orders
-
-2️⃣ Vehicles API
-Create Vehicle
-POST /api/vehicles
-
-json
-Copy
-Edit
-{
-  "vehicleId": "VEH001",
-  "capacity": 200
-}
-Get All Vehicles
-GET /api/vehicles
-
-3️⃣ Dispatch API
-Generate Dispatch Plan
-POST /api/dispatch/plan
-
-json
-Copy
-Edit
-{
-  "strategy": "BALANCED"   // Options: BALANCED, CAPACITY_FIRST, DISTANCE_FIRST
-}
-Response Example
+📤 Response:
 
 json
 Copy
 Edit
 [
   {
-    "vehicleId": "VEH001",
-    "totalLoad": 150,
-    "totalDistance": "450 km",
+    "vehicleId": "V1",
+    "totalLoad": 100,
+    "totalDistance": "120 km",
     "assignedOrders": [
-      { "orderId": "ORD001", "weight": 50 },
-      { "orderId": "ORD002", "weight": 100 }
+      { "orderId": "O1", "load": 50, "destination": "Bangalore" },
+      { "orderId": "O2", "load": 50, "destination": "Chennai" }
     ]
   },
   {
-    "vehicleId": "UNASSIGNED",
-    "totalLoad": 0,
-    "totalDistance": "0 km",
+    "vehicleId": "V2",
+    "totalLoad": 80,
+    "totalDistance": "300 km",
     "assignedOrders": [
-      { "orderId": "ORD005", "weight": 400 }
+      { "orderId": "O3", "load": 80, "destination": "Hyderabad" }
     ]
   }
 ]
-📊 ERD (Entity Relationship Diagram)
+2. Get All Plans
+GET /api/plans
+
+📤 Response:
+
+json
+Copy
+Edit
+[
+  {
+    "vehicleId": "V1",
+    "totalLoad": 100,
+    "totalDistance": "120 km",
+    "assignedOrders": [...]
+  },
+  {
+    "vehicleId": "V2",
+    "totalLoad": 80,
+    "totalDistance": "300 km",
+    "assignedOrders": [...]
+  }
+]
+3. Get H2 Database Console
+GET /h2-console
+
+Use JDBC URL: jdbc:h2:mem:testdb
+
+📊 ERD Diagram
+Below is the Entity Relationship Diagram (ERD) for the project:
+
 mermaid
 Copy
 Edit
 erDiagram
-    VEHICLE ||--o{ ORDER : "assigned"
     VEHICLE {
         string vehicleId PK
         int capacity
     }
     ORDER {
         string orderId PK
-        int weight
-        string pickupLocation
-        string dropLocation
+        int load
+        string destination
+        string status
     }
     PLAN {
+        string planId PK
         string vehicleId FK
         int totalLoad
         string totalDistance
     }
-🧪 Running Tests
-Run unit & integration tests:
 
-bash
-Copy
-Edit
-mvn test
+    VEHICLE ||--o{ PLAN : has
+    PLAN ||--o{ ORDER : assigns
+🚀 Future Improvements
+Real-time vehicle tracking.
+
+Dynamic load balancing with AI/ML.
+
+Integration with external fleet management systems.
+
