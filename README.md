@@ -5,163 +5,163 @@ The **Load Balancer** project is a Spring Boot application that simulates an **o
 It assigns customer orders to available vehicles based on capacity, distance, and optimization rules.  
 If some orders cannot be assigned, they are returned as **unassignable orders**.
 
-This project demonstrates:
-- Vehicle & Order management
-- Dispatch planning algorithm
-- Google Maps Directions API integration (for distance calculation)
-- REST API with Swagger Documentation
-- In-memory H2 Database
+## 🧠 Project Overview
+
+This service allows:
+- 📦 Ingesting delivery orders
+- 🚗 Ingesting available vehicles
+- 🧮 Generating an optimal dispatch plan based on proximity and capacity
+- ⚖️ Prioritizing HIGH > MEDIUM > LOW order assignments
 
 ---
 
-## 🛠️ Tech Stack
-- **Java 17**
-- **Spring Boot 3**
-- **Spring Data JPA**
-- **H2 Database (in-memory)**
-- **Springdoc OpenAPI (Swagger UI)**
-- **Lombok**
-- **Google Maps Directions API**
-
----
-
-## 🗄️ ERD (Entity Relationship Diagram)
+## 📐 ERD Diagram
 
 ```mermaid
 erDiagram
-    VEHICLE {
-        String id PK
-        String vehicleNumber
-        Integer capacity
+    Order {
+        Long id
+        String orderId
+        Double latitude
+        Double longitude
+        Integer weight
+        Enum priority
+        String address
     }
 
-    ORDERS {
-        String id PK
-        String pickupLocation
-        String dropLocation
-        Integer load
-        String status
-    }
-
-    PLANRESPONSE {
+    Vehicle {
+        Long id
         String vehicleId
-        Integer totalLoad
-        String totalDistance
+        Integer capacity
+        Double currLatitude
+        Double currLongitude
+        String currAddress
     }
 
-    VEHICLE ||--o{ ORDERS : "assigned"
-    PLANRESPONSE ||--o{ ORDERS : "assignedOrders"
-⚙️ Setup Instructions
-1. Clone Repository
-bash
-Copy
-Edit
-git clone https://github.com/your-username/loadbalancer.git
-cd loadbalancer
-2. Run Application
-bash
-Copy
-Edit
-./mvnw spring-boot:run
-3. Access H2 Database Console
-URL: http://localhost:8080/h2-console
+    OrdersRequest ||--o{ Order : contains
+    VehicleRequest ||--o{ Vehicle : contains
+🔌 API Endpoints
+Method	Endpoint	Description
+POST	/api/dispatch/orders	Submit list of delivery orders
+POST	/api/dispatch/vehicles	Submit list of available vehicles
+GET	/api/dispatch/plan	Get optimized dispatch plan
 
-JDBC URL: jdbc:h2:mem:testdb
-
-Username: sa
-
-Password: (empty)
-
-4. Access Swagger UI
-URL: http://localhost:8080/swagger-ui.html
-
-🔗 REST APIs
-Vehicle Management
-➕ Add Vehicle
-POST /api/vehicles
-
+📤 Sample Requests
+1. POST /api/dispatch/orders
 json
-Copy
-Edit
+Copy code
 {
-  "vehicleNumber": "KA01AB1234",
-  "capacity": 100
-}
-📋 Get All Vehicles
-GET /api/vehicles
-
-Order Management
-➕ Add Order
-POST /api/orders
-
-json
-Copy
-Edit
-{
-  "pickupLocation": "Bangalore",
-  "dropLocation": "Chennai",
-  "load": 40
-}
-📋 Get All Orders
-GET /api/orders
-
-Dispatch Planning
-🚚 Generate Dispatch Plan
-POST /api/plan
-
-json
-Copy
-Edit
-{
-  "vehicleIds": ["V1", "V2"],
-  "orderIds": ["O1", "O2", "O3"]
-}
-📦 Sample Response
-
-json
-Copy
-Edit
-{
-  "plans": [
+  "orders": [
     {
-      "vehicleId": "V1",
-      "totalLoad": 80,
-      "totalDistance": "350 km",
-      "assignedOrders": [
-        {
-          "id": "O1",
-          "pickupLocation": "Bangalore",
-          "dropLocation": "Chennai",
-          "load": 40
-        }
-      ]
-    }
-  ],
-  "unassignedOrders": [
-    {
-      "id": "O3",
-      "pickupLocation": "Hyderabad",
-      "dropLocation": "Goa",
-      "load": 150
+      "orderId": "O1",
+      "latitude": 28.5,
+      "longitude": 77.0,
+      "packageWeight": 10,
+      "priority": "HIGH",
+      "address": "Hyderabad"
     }
   ]
 }
-✅ Features
-Assigns orders to vehicles based on capacity
+2. POST /api/dispatch/vehicles
+json
+Copy code
+{
+  "vehicles": [
+    {
+      "vehicleId": "V1",
+      "capacity": 50,
+      "currentLatitude": 28.6,
+      "currentLongitude": 77.3,
+      "currentAddress": "Delhi"
+    }
+  ]
+}
+3. GET /api/dispatch/plan
+json
+Copy code
+{
+  "dispatchPlan": [
+    {
+      "vehicleId": "V1",
+      "totalLoad": 10,
+      "totalDistance": "33.2 km",
+      "assignedOrders": [
+        {
+          "orderId": "O1",
+          "latitude": 28.5,
+          "longitude": 77.0,
+          "weight": 10,
+          "priority": "HIGH",
+          "address": "Hyderabad"
+        }
+      ]
+    }
+  ]
+}
+⚙️ Tech Stack
+Java 17+
 
-Calculates distance using Google Maps Directions API
+Spring Boot 3+
 
-Returns unassigned orders when no vehicle can accommodate them
+Spring Web
 
-Interactive Swagger UI for testing APIs
+Spring Data JPA
 
-In-memory DB for quick prototyping
+H2 / MySQL (JPA Compatible)
 
-🚀 Future Enhancements
-Optimize dispatch plan using advanced algorithms (Hungarian / Linear programming)
+Lombok
 
-Support for real-time GPS tracking
+Validation API (Jakarta)
 
-Multi-depot and route-optimization logic
+JUnit 5
 
-Integration with external logistics systems
+Mockito
+
+🧪 Testing
+Run unit tests:
+
+bash
+Copy code
+./mvnw test
+All core business logic is covered with unit tests in:
+
+Copy code
+LoadBalancerServiceTest.java
+🚀 Running the Application
+Prerequisites:
+JDK 17+
+
+Maven
+
+Steps:
+bash
+Copy code
+# Clone the repository
+git clone https://github.com/your-org/freightfox-loadbalancer.git
+cd freightfox-loadbalancer
+
+# Build and run the app
+./mvnw spring-boot:run
+The application will be running at:
+
+arduino
+Copy code
+http://localhost:8080
+📦 Project Structure
+Copy code
+com.freightfox.loadbalancer
+├── controller
+├── model
+├── repository
+├── service
+├── GlobalExceptionHandler.java
+└── LoadbalancerController.java
+🧾 Notes
+Validation errors return a structured JSON response.
+
+Orders and Vehicles must have unique IDs (orderId, vehicleId).
+
+Orders are assigned based on proximity and available vehicle capacity.
+
+Unassigned orders are stored internally for future planning (can be extended to show in plan).
+
